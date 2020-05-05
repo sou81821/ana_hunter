@@ -6,16 +6,16 @@ from
 	select
 	  c_race_name
 	  ,horse_num
-	  ,max(case rank when '01' then rank_count else 0 end) as first_count
-	  ,max(case rank when '02' then rank_count else 0 end) as second_count
-	  ,max(case rank when '03' then rank_count else 0 end) as third_count
-	  ,max(case when rank not in ('01', '02', '03') then rank_count else 0 end) as out_count
+	  ,max(case c_rank when '01' then rank_count else 0 end) as first_count
+	  ,max(case c_rank when '02' then rank_count else 0 end) as second_count
+	  ,max(case c_rank when '03' then rank_count else 0 end) as third_count
+	  ,max(case c_rank when '04~' then rank_count else 0 end) as out_count
 	from
 	  (
 		select
 		  c_race_name
 		  ,horse_num
-		  ,rank
+		  ,case when rank in ('01', '02', '03') then rank else '04~' end as c_rank
 		  ,count(*) as rank_count
 		from
 		  (
@@ -28,10 +28,12 @@ from
 		  left join results
 		    on c_races.race_key = results.race_key
 		group by
-		  c_race_name, horse_num, rank
+		  c_race_name, horse_num, c_rank
 	  ) as tmp
 	group by
 	  c_race_name, horse_num
   ) as tmp
+where
+  horse_num is not null
 order by
   c_race_name
